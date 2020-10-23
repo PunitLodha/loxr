@@ -1,6 +1,7 @@
 use scanner::Scanner;
 use std::cmp::Ordering;
 use std::env;
+use std::error::Error;
 use std::fs;
 use std::io::{stdin, stdout, Write};
 use std::process;
@@ -29,7 +30,10 @@ impl RunType {
 
 pub fn run_file(path: &str) {
     let file_contents = fs::read_to_string(path).expect("Something went wrong reading the file");
-    run(file_contents);
+    if let Err(error) = run(file_contents) {
+        println!("Error: {}", error);
+        process::exit(1);
+    };
 }
 
 pub fn run_prompt() {
@@ -41,12 +45,16 @@ pub fn run_prompt() {
         if bytes_read == 0 {
             break;
         }
-        run(line);
+        if let Err(error) = run(line) {
+            println!("Error: {}", error);
+        };
     }
 }
-fn run(content: String) {
+fn run(content: String) -> Result<(), Box<dyn Error>> {
     let mut scanner = Scanner::new(content);
-    scanner.scan_tokens();
+    scanner.scan_tokens()?;
+    scanner.display_tokens();
+    Ok(())
 }
 
 fn main() {

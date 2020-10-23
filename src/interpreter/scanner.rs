@@ -32,51 +32,51 @@ impl Scanner {
         while let Some(c) = characters.next() {
             self.start = self.current;
             match c {
-                '(' => self.add_token(TokenType::LeftParen, None),
-                ')' => self.add_token(TokenType::RightParen, None),
-                '{' => self.add_token(TokenType::LeftBrace, None),
-                '}' => self.add_token(TokenType::RightBrace, None),
-                ',' => self.add_token(TokenType::Comma, None),
-                '.' => self.add_token(TokenType::Dot, None),
-                '-' => self.add_token(TokenType::Minus, None),
-                '+' => self.add_token(TokenType::Plus, None),
-                ';' => self.add_token(TokenType::Semicolon, None),
-                '*' => self.add_token(TokenType::Star, None),
+                '(' => self.add_token(TokenType::LeftParen),
+                ')' => self.add_token(TokenType::RightParen),
+                '{' => self.add_token(TokenType::LeftBrace),
+                '}' => self.add_token(TokenType::RightBrace),
+                ',' => self.add_token(TokenType::Comma),
+                '.' => self.add_token(TokenType::Dot),
+                '-' => self.add_token(TokenType::Minus),
+                '+' => self.add_token(TokenType::Plus),
+                ';' => self.add_token(TokenType::Semicolon),
+                '*' => self.add_token(TokenType::Star),
                 '!' => match characters.peek() {
                     Some(val) => {
                         if *val == '=' {
-                            self.add_token(TokenType::BangEqual, None);
+                            self.add_token(TokenType::BangEqual);
                             characters.next();
                         }
                     }
-                    None => self.add_token(TokenType::Bang, None),
+                    None => self.add_token(TokenType::Bang),
                 },
                 '=' => match characters.peek() {
                     Some(val) => {
                         if *val == '=' {
-                            self.add_token(TokenType::EqualEqual, None);
+                            self.add_token(TokenType::EqualEqual);
                             characters.next();
                         }
                     }
-                    None => self.add_token(TokenType::Equal, None),
+                    None => self.add_token(TokenType::Equal),
                 },
                 '>' => match characters.peek() {
                     Some(val) => {
                         if *val == '=' {
-                            self.add_token(TokenType::GreaterEqual, None);
+                            self.add_token(TokenType::GreaterEqual);
                             characters.next();
                         }
                     }
-                    None => self.add_token(TokenType::Greater, None),
+                    None => self.add_token(TokenType::Greater),
                 },
                 '<' => match characters.peek() {
                     Some(val) => {
                         if *val == '=' {
-                            self.add_token(TokenType::LessEqual, None);
+                            self.add_token(TokenType::LessEqual);
                             characters.next();
                         }
                     }
-                    None => self.add_token(TokenType::Less, None),
+                    None => self.add_token(TokenType::Less),
                 },
                 '/' => match characters.peek() {
                     Some(val) => {
@@ -88,7 +88,7 @@ impl Scanner {
                             }
                         }
                     }
-                    None => self.add_token(TokenType::Slash, None),
+                    None => self.add_token(TokenType::Slash),
                 },
                 ' ' | '\r' | '\t' => (),
                 '\n' => self.line += 1,
@@ -101,15 +101,15 @@ impl Scanner {
                 }
             };
         }
-        let eof = Token::new(TokenType::EOF, String::new(), None, self.line);
+        let eof = Token::new(TokenType::EOF, String::new(), self.line);
         self.tokens.push(eof);
         Ok(())
     }
-    fn add_token(&mut self, kind: TokenType, literal: Option<TokenType>) {
+    fn add_token(&mut self, kind: TokenType) {
         let start = self.start as usize;
         let current = self.current as usize;
         let text = &self.source[start..current];
-        let token = Token::new(kind, text.to_owned(), literal, self.line);
+        let token = Token::new(kind, text.to_owned(), self.line);
         self.tokens.push(token);
     }
 }

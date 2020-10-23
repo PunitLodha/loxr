@@ -25,9 +25,7 @@ pub enum TokenType {
     LessEqual,
 
     // Literals.
-    Identifier,
-    String,
-    Number,
+    Literals(LiteralType),
 
     // Keywords.
     And,
@@ -51,29 +49,26 @@ pub enum TokenType {
     EOF,
 }
 
+#[derive(Debug)]
+pub enum LiteralType {
+    String(String),
+    Integer(u32),
+    Identifier(String),
+}
 pub struct Token {
     kind: TokenType,
     lexeme: String,
-    literal: Option<TokenType>,
     line: u32,
 }
 
 impl Token {
-    pub fn new(kind: TokenType, lexeme: String, literal: Option<TokenType>, line: u32) -> Token {
-        Token {
-            kind,
-            lexeme,
-            literal,
-            line,
-        }
+    pub fn new(kind: TokenType, lexeme: String, line: u32) -> Token {
+        Token { kind, lexeme, line }
     }
 }
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.literal {
-            Some(val) => write!(f, "{:?} {} {:?}", self.kind, self.lexeme, val),
-            None => write!(f, "{:?} {}", self.kind, self.lexeme),
-        }
+        write!(f, "{:?} {}", self.kind, self.lexeme)
     }
 }

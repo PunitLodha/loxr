@@ -1,3 +1,4 @@
+use super::error::CodeError;
 use super::token::{Token, TokenType};
 pub struct Scanner {
     source: String,
@@ -18,7 +19,14 @@ impl Scanner {
             line: 1,
         }
     }
-    pub fn scan_tokens(&mut self) {
+
+    pub fn display_tokens(self) {
+        for token in self.tokens.iter() {
+            println!("{}", token);
+        }
+    }
+
+    pub fn scan_tokens(&mut self) -> Result<(), CodeError> {
         let source = self.source.clone();
         let mut characters = source.chars().peekable();
         while let Some(c) = characters.next() {
@@ -34,11 +42,18 @@ impl Scanner {
                 '+' => self.add_token(TokenType::Plus, None),
                 ';' => self.add_token(TokenType::Semicolon, None),
                 '*' => self.add_token(TokenType::Star, None),
-                _ => (),
-            }
+                err => {
+                    return Err(CodeError::new(
+                        self.line,
+                        String::new(),
+                        format!("Unexpected character {}", err),
+                    ))
+                }
+            };
         }
         let eof = Token::new(TokenType::EOF, String::new(), None, self.line);
         self.tokens.push(eof);
+        Ok(())
     }
     fn add_token(&mut self, kind: TokenType, literal: Option<TokenType>) {
         let start = self.start as usize;

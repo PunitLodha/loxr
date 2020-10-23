@@ -90,6 +90,8 @@ impl Scanner {
                     }
                     None => self.add_token(TokenType::Slash, None),
                 },
+                ' ' | '\r' | '\t' => (),
+                '\n' => self.line += 1,
                 err => {
                     return Err(CodeError::new(
                         self.line,

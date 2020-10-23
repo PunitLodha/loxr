@@ -42,6 +42,54 @@ impl Scanner {
                 '+' => self.add_token(TokenType::Plus, None),
                 ';' => self.add_token(TokenType::Semicolon, None),
                 '*' => self.add_token(TokenType::Star, None),
+                '!' => match characters.peek() {
+                    Some(val) => {
+                        if *val == '=' {
+                            self.add_token(TokenType::BangEqual, None);
+                            characters.next();
+                        }
+                    }
+                    None => self.add_token(TokenType::Bang, None),
+                },
+                '=' => match characters.peek() {
+                    Some(val) => {
+                        if *val == '=' {
+                            self.add_token(TokenType::EqualEqual, None);
+                            characters.next();
+                        }
+                    }
+                    None => self.add_token(TokenType::Equal, None),
+                },
+                '>' => match characters.peek() {
+                    Some(val) => {
+                        if *val == '=' {
+                            self.add_token(TokenType::GreaterEqual, None);
+                            characters.next();
+                        }
+                    }
+                    None => self.add_token(TokenType::Greater, None),
+                },
+                '<' => match characters.peek() {
+                    Some(val) => {
+                        if *val == '=' {
+                            self.add_token(TokenType::LessEqual, None);
+                            characters.next();
+                        }
+                    }
+                    None => self.add_token(TokenType::Less, None),
+                },
+                '/' => match characters.peek() {
+                    Some(val) => {
+                        if *val == '/' {
+                            while let Some(val) = characters.peek() {
+                                if *val != '\n' {
+                                    characters.next();
+                                }
+                            }
+                        }
+                    }
+                    None => self.add_token(TokenType::Slash, None),
+                },
                 err => {
                     return Err(CodeError::new(
                         self.line,

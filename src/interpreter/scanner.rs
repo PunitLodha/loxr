@@ -1,5 +1,7 @@
-use super::error::CodeError;
-use super::token::{Token, TokenType};
+use std::error::Error;
+
+use crate::error::CodeError;
+use crate::token::{get_keyword_token, LiteralType, Token, TokenType};
 pub struct Scanner {
     source: String,
     tokens: Vec<Token>,
@@ -26,7 +28,7 @@ impl Scanner {
         }
     }
 
-    pub fn scan_tokens(&mut self) -> Result<(), CodeError> {
+    pub fn scan_tokens(&mut self) -> Result<(), Box<dyn Error>> {
         let source = self.source.clone();
         let mut characters = source.chars().peekable();
         while let Some(c) = characters.next() {
@@ -43,8 +45,8 @@ impl Scanner {
                 ';' => self.add_token(TokenType::Semicolon),
                 '*' => self.add_token(TokenType::Star),
                 '!' => match characters.peek() {
-                    Some(val) => {
-                        if *val == '=' {
+                    Some(&val) => {
+                        if val == '=' {
                             self.add_token(TokenType::BangEqual);
                             characters.next();
                         }
@@ -52,8 +54,8 @@ impl Scanner {
                     None => self.add_token(TokenType::Bang),
                 },
                 '=' => match characters.peek() {
-                    Some(val) => {
-                        if *val == '=' {
+                    Some(&val) => {
+                        if val == '=' {
                             self.add_token(TokenType::EqualEqual);
                             characters.next();
                         }
@@ -61,8 +63,8 @@ impl Scanner {
                     None => self.add_token(TokenType::Equal),
                 },
                 '>' => match characters.peek() {
-                    Some(val) => {
-                        if *val == '=' {
+                    Some(&val) => {
+                        if val == '=' {
                             self.add_token(TokenType::GreaterEqual);
                             characters.next();
                         }
@@ -70,8 +72,8 @@ impl Scanner {
                     None => self.add_token(TokenType::Greater),
                 },
                 '<' => match characters.peek() {
-                    Some(val) => {
-                        if *val == '=' {
+                    Some(&val) => {
+                        if val == '=' {
                             self.add_token(TokenType::LessEqual);
                             characters.next();
                         }
@@ -79,10 +81,10 @@ impl Scanner {
                     None => self.add_token(TokenType::Less),
                 },
                 '/' => match characters.peek() {
-                    Some(val) => {
-                        if *val == '/' {
-                            while let Some(val) = characters.peek() {
-                                if *val != '\n' {
+                    Some(&val) => {
+                        if val == '/' {
+                            while let Some(&val) = characters.peek() {
+                                if val != '\n' {
                                     characters.next();
                                 }
                             }
@@ -92,12 +94,87 @@ impl Scanner {
                 },
                 ' ' | '\r' | '\t' => (),
                 '\n' => self.line += 1,
+                '"' => {
+                    let mut string_literal = String::new();
+                    loop {
+                        match characters.peek() {
+                            Some(&val) => {
+                                if val != '"' {
+                                    if val == '\n' {
+                                        self.line += 1
+                                    }
+                                    string_literal.push(val);
+                                    characters.next();
+                                } else {
+                                    break;
+                                }
+                            }
+                            None => {
+                                return Err(Box::new(CodeError::new(
+                                    self.line,
+                                    String::new(),
+                                    format!("Unterminated String"),
+                                )))
+                            }
+                        }
+                    }
+                    self.add_token(TokenType::Literals(LiteralType::String(string_literal)));
+                }
+                '0'..='9' => {
+                    let mut number_literal = String::new();
+                    number_literal.push(c);
+                    while let Some(&val) = characters.peek() {
+                        if val.is_ascii_digit() {
+                            number_literal.push(val);
+                            characters.next();
+                        } else if val == '.' {
+                            number_literal.push(val);
+                            characters.next();
+                            match characters.peek() {
+                                Some(ch) => {
+                                    if !ch.is_ascii_digit() {
+                                        return Err(Box::new(CodeError::new(
+                                            self.line,
+                                            String::new(),
+                                            format!("Invalid Number"),
+                                        )));
+                                    }
+                                }
+                                None => {
+                                    return Err(Box::new(CodeError::new(
+                                        self.line,
+                                        String::new(),
+                                        format!("Invalid Number"),
+                                    )))
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    let number: f32 = number_literal.parse()?;
+                    self.add_token(TokenType::Literals(LiteralType::Integer(number)));
+                }
+                'a'..='z' | 'A'..='Z' | '_' => {
+                    let mut identifier = String::new();
+                    identifier.push(c);
+                    while let Some(&val) = characters.peek() {
+                        if val.is_ascii_alphanumeric() {
+                            identifier.push(val);
+                            characters.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    let token = get_keyword_token(&identifier);
+                    self.add_token(token);
+                }
                 err => {
-                    return Err(CodeError::new(
+                    return Err(Box::new(CodeError::new(
                         self.line,
                         String::new(),
                         format!("Unexpected character {}", err),
-                    ))
+                    )))
                 }
             };
         }

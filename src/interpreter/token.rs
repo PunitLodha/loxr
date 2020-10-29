@@ -52,7 +52,7 @@ pub enum TokenType {
 #[derive(Debug)]
 pub enum LiteralType {
     String(String),
-    Integer(u32),
+    Integer(f32),
     Identifier(String),
 }
 pub struct Token {
@@ -70,5 +70,27 @@ impl Token {
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?} {}", self.kind, self.lexeme)
+    }
+}
+
+pub fn get_keyword_token(keyword: &str) -> TokenType {
+    match keyword {
+        "and" => TokenType::And,
+        "class" => TokenType::Class,
+        "else" => TokenType::Else,
+        "false" => TokenType::False,
+        "for" => TokenType::For,
+        "fun" => TokenType::Fun,
+        "if" => TokenType::If,
+        "nil" => TokenType::Nil,
+        "or" => TokenType::Or,
+        "print" => TokenType::Print,
+        "return" => TokenType::Return,
+        "super" => TokenType::Super,
+        "this" => TokenType::This,
+        "true" => TokenType::True,
+        "var" => TokenType::Var,
+        "while" => TokenType::While,
+        value => TokenType::Literals(LiteralType::Identifier(value.to_string())),
     }
 }

@@ -19,11 +19,11 @@ impl RunType {
         // first argument is always name of the binary
         match args.len().cmp(&2) {
             Ordering::Greater => Err("Usage: loxr [script]"),
-            Ordering::Less => {
+            Ordering::Less => Ok(RunType::Prompt),
+            Ordering::Equal => {
                 let path = args[1].clone();
                 Ok(RunType::File(path))
             }
-            Ordering::Equal => Ok(RunType::Prompt),
         }
     }
 }

@@ -106,6 +106,7 @@ impl Scanner {
                                     string_literal.push(val);
                                     characters.next();
                                 } else {
+                                    characters.next();
                                     break;
                                 }
                             }

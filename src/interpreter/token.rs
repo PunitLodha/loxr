@@ -57,19 +57,18 @@ pub enum LiteralType {
 }
 pub struct Token {
     kind: TokenType,
-    lexeme: String,
     line: u32,
 }
 
 impl Token {
-    pub fn new(kind: TokenType, lexeme: String, line: u32) -> Token {
-        Token { kind, lexeme, line }
+    pub fn new(kind: TokenType, line: u32) -> Token {
+        Token { kind, line }
     }
 }
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?} {}", self.kind, self.lexeme)
+        write!(f, "{:?}", self.kind)
     }
 }
 

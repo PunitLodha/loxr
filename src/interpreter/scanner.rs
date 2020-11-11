@@ -5,8 +5,6 @@ use crate::token::{get_keyword_token, LiteralType, Token, TokenType};
 pub struct Scanner {
     source: String,
     tokens: Vec<Token>,
-    start: u32,
-    current: u32,
     line: u32,
 }
 
@@ -16,8 +14,6 @@ impl Scanner {
         Scanner {
             source,
             tokens,
-            start: 0,
-            current: 0,
             line: 1,
         }
     }
@@ -32,7 +28,6 @@ impl Scanner {
         let source = self.source.clone();
         let mut characters = source.chars().peekable();
         while let Some(c) = characters.next() {
-            self.start = self.current;
             match c {
                 '(' => self.add_token(TokenType::LeftParen),
                 ')' => self.add_token(TokenType::RightParen),
@@ -179,15 +174,12 @@ impl Scanner {
                 }
             };
         }
-        let eof = Token::new(TokenType::EOF, String::new(), self.line);
+        let eof = Token::new(TokenType::EOF, self.line);
         self.tokens.push(eof);
         Ok(())
     }
     fn add_token(&mut self, kind: TokenType) {
-        let start = self.start as usize;
-        let current = self.current as usize;
-        let text = &self.source[start..current];
-        let token = Token::new(kind, text.to_owned(), self.line);
+        let token = Token::new(kind, self.line);
         self.tokens.push(token);
     }
 }
